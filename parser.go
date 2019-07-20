@@ -44,7 +44,7 @@ func (cmd CommandType) IsPrintable() bool {
 // NewParser is a factory that creates a parser instance for the given file
 func NewParser(infile *os.File) Parser {
 	scanner := bufio.NewScanner(infile)
-	return Parser{infile, scanner, Command{}}
+	return Parser{infile, scanner, Command{}, true}
 }
 
 // HasMoreCommands indicates whether the entire input file has been processed

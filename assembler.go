@@ -35,12 +35,12 @@ func (asm *Assembler) Convert() {
 		p.Advance()
 		ctype, err := p.CommandType()
 		if err != nil {
-			log.Fatalf("Unable to parse line %s: %s", 1, err) //TODO: get the actual line number
+			log.Fatalf("Unable to parse line %d: %s", 1, err) //TODO: get the actual line number
 		}
 		if ctype.IsPrintable() {
 			cmd, err := p.CurrentCommand()
 			if err != nil {
-				log.Fatalf("Unable to parse line %s: %s", 1, err) //TODO: get the actual line number
+				log.Fatalf("Unable to parse line %d: %s", 1, err) //TODO: get the actual line number
 			}
 			asm.processCommand(cmd)
 		}
