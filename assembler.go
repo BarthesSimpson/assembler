@@ -15,32 +15,48 @@ type Assembler struct {
 }
 
 // Convert is the main routine that processes the input file into the output file
-func (ass *Assembler) Convert() {
-	source, err := os.Open(ass.inpath)
+func (asm *Assembler) Convert() {
+	infile, err := os.Open(asm.inpath)
 	if err != nil {
 		log.Fatalf("Unable to open input file: %s", err)
 	}
-	defer source.Close()
+	defer infile.Close()
 
-	dest, err := os.Create(ass.outpath)
+	dest, err := os.Create(asm.outpath)
 	if err != nil {
 		log.Fatalf("Unable to write output file: %s", err)
 	}
 	defer dest.Close()
 
-	ass.w = bufio.NewWriter(dest)
+	p := NewParser(infile)
+	asm.w = bufio.NewWriter(dest)
 
-	scanner := bufio.NewScanner(source)
-	for scanner.Scan() {
-		ass.ProcessLine(scanner.Text())
+	for p.HasMoreCommands() {
+		p.Advance()
+		ctype, err := p.CommandType()
+		if err != nil {
+			log.Fatalf("Unable to parse line %s: %s", 1, err) //TODO: get the actual line number
+		}
+		if ctype.IsPrintable() {
+			cmd, err := p.CurrentCommand()
+			if err != nil {
+				log.Fatalf("Unable to parse line %s: %s", 1, err) //TODO: get the actual line number
+			}
+			asm.processCommand(cmd)
+		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	// scanner := bufio.NewScanner(source)
+	// for scanner.Scan() {
+	// 	asm.ProcessLine(scanner.Text())
+	// }
+
+	// if err := scanner.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
 }
 
-// ProcessLine detects the type of the line and forwards it to the appropriate handler
-func (ass *Assembler) ProcessLine(line string) {
-	fmt.Println(line)
+func (asm *Assembler) processCommand(cmd Command) {
+	fmt.Println(cmd)
+	return
 }
