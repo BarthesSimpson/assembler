@@ -40,4 +40,20 @@ func TestCode(t *testing.T) {
 			}
 		})
 	})
+
+	g.Describe("Jump translation", func() {
+		c := Code{}
+		g.It("Generates unique binary outputs for every Jump mnemonic", func() {
+			m := map[string]string{}
+			for i, s := range JumpStrings {
+				jmp := JumpMnemonic(i)
+				bits := fmt.Sprintf("%v", c.Jump(jmp))
+				if prev, exists := m[bits]; exists == true {
+					err := fmt.Sprintf("Same bit value found for %s and %s", s, prev)
+					g.Assert(false).IsTrue(err)
+				}
+				m[bits] = s
+			}
+		})
+	})
 }

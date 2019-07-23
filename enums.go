@@ -43,6 +43,25 @@ const (
 // MemoryLocationStrings enables converting a MemoryLocation to and from its string representation
 var MemoryLocationStrings = []string{"null", "M", "D", "MD", "A", "AM", "AD", "AMD"}
 
+// JumpMnemonic is an integer enum type
+type JumpMnemonic int
+
+// Enum for the possible jump mnemonics that a C command
+// can encode
+const (
+	JmpNull JumpMnemonic = iota
+	JGT
+	JEQ
+	JGE
+	JLT
+	JNE
+	JLE
+	JMP
+)
+
+// JumpStrings enables converting a Jump to and from its string representation
+var JumpStrings = []string{"null", "JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP"}
+
 // CompMnemonic is an integer enum type
 type CompMnemonic int
 
@@ -81,25 +100,6 @@ const (
 
 // CompStrings enables converting a Comp to and from its string representation
 var CompStrings = []string{"0", "1", "-1", "D", "A", "!D", "!A", "-D", "-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", "A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", "M-1", "D+M", "D-M", "M-D", "D&M", "D|M"}
-
-// JumpMnemonic is an integer enum type
-type JumpMnemonic int
-
-// Enum for the possible jump mnemonics that a C command
-// can encode
-const (
-	JmpNull JumpMnemonic = iota
-	JGT
-	FEQ
-	JGE
-	JLT
-	JNE
-	JLE
-	JMP
-)
-
-// JumpStrings enables converting a Jump to and from its string representation
-var JumpStrings = []string{"null", "JGT", "FEQ", "JGE", "JLT", "JNE", "JLE", "JMP"}
 
 // EnumValFromString enables converting a string into an enum value
 func EnumValFromString(enumStrings []string, searchVal string) int {

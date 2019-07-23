@@ -32,6 +32,33 @@ func (c *Code) Dest(mloc MemoryLocation) bit.BitArray {
 	return out
 }
 
+// Jump converts a Jump mnemonic into its binary representation
+func (c *Code) Jump(jmp JumpMnemonic) bit.BitArray {
+	out := bit.NewBitArray(3)
+	if jmp == JGT {
+		return setBits(out, []bool{false, false, true})
+	}
+	if jmp == JEQ {
+		return setBits(out, []bool{false, true, false})
+	}
+	if jmp == JGE {
+		return setBits(out, []bool{false, true, true})
+	}
+	if jmp == JLT {
+		return setBits(out, []bool{true, false, false})
+	}
+	if jmp == JNE {
+		return setBits(out, []bool{true, false, true})
+	}
+	if jmp == JLE {
+		return setBits(out, []bool{true, true, false})
+	}
+	if jmp == JMP {
+		return setBits(out, []bool{true, true, true})
+	}
+	return out
+}
+
 // Comp converts a Comp mnemonic into its binary representation
 func (c *Code) Comp(comp CompMnemonic) bit.BitArray {
 	out := bit.NewBitArray(7)
@@ -120,11 +147,6 @@ func (c *Code) Comp(comp CompMnemonic) bit.BitArray {
 		return setBits(out, []bool{true, false, true, false, true, false, true})
 	}
 	return out
-}
-
-// Jump converts a Jump mnemonic into its binary representation
-func (c *Code) Jump(jmp JumpMnemonic) bit.BitArray {
-	return bit.NewBitArray(3)
 }
 
 func setBits(arr bit.BitArray, bits []bool) bit.BitArray {
