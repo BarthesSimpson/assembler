@@ -7,7 +7,29 @@ type Code struct{}
 
 // Dest converts a MemoryLocation mnemonic into its binary representation
 func (c *Code) Dest(mloc MemoryLocation) bit.BitArray {
-	return bit.NewBitArray(3)
+	out := bit.NewBitArray(3)
+	if mloc == LocM {
+		return setBits(out, []bool{false, false, true})
+	}
+	if mloc == LocD {
+		return setBits(out, []bool{false, true, false})
+	}
+	if mloc == LocMD {
+		return setBits(out, []bool{false, true, true})
+	}
+	if mloc == LocA {
+		return setBits(out, []bool{true, false, false})
+	}
+	if mloc == LocAM {
+		return setBits(out, []bool{true, false, true})
+	}
+	if mloc == LocAD {
+		return setBits(out, []bool{true, true, false})
+	}
+	if mloc == LocAMD {
+		return setBits(out, []bool{true, true, true})
+	}
+	return out
 }
 
 // Comp converts a Comp mnemonic into its binary representation
@@ -41,16 +63,16 @@ func (c *Code) Comp(comp CompMnemonic) bit.BitArray {
 		return setBits(out, []bool{false, true, true, false, false, true, true})
 	}
 	if comp == CompDplus1 {
-		return setBits(out, []bool{false, false, true, false, false, true, true})
+		return setBits(out, []bool{false, false, true, true, true, true, true})
 	}
 	if comp == CompAplus1 {
 		return setBits(out, []bool{false, true, true, false, true, true, true})
 	}
 	if comp == CompDminus1 {
-		return setBits(out, []bool{false, true, true, false, false, true, false})
+		return setBits(out, []bool{false, false, false, true, true, true, false})
 	}
 	if comp == CompAminus1 {
-		return setBits(out, []bool{false, true, true, false, true, true, true})
+		return setBits(out, []bool{false, true, true, false, false, true, false})
 	}
 	if comp == CompDplusA {
 		return setBits(out, []bool{false, false, false, false, false, true, false})
@@ -80,7 +102,7 @@ func (c *Code) Comp(comp CompMnemonic) bit.BitArray {
 		return setBits(out, []bool{true, true, true, false, true, true, true})
 	}
 	if comp == CompMminus1 {
-		return setBits(out, []bool{true, true, true, false, true, true, true})
+		return setBits(out, []bool{true, true, true, false, false, true, false})
 	}
 	if comp == CompDplusM {
 		return setBits(out, []bool{true, false, false, false, false, true, false})
