@@ -12,8 +12,8 @@ import (
 // Command represents a single assembly command
 type Command struct {
 	ctype  CommandType
-	comp   Comp
-	jump   Jump
+	comp   CompMnemonic
+	jump   JumpMnemonic
 	mloc   MemoryLocation
 	symbol string
 }
@@ -107,7 +107,7 @@ func (p *Parser) parseCInstruction(line string) (Command, error) {
 		if jmp == -1 {
 			return Command{}, fmt.Errorf("%s is not a valid jump expression", chars[1])
 		}
-		return Command{C, Comp(cmp), Jump(jmp), LocNull, ""}, nil
+		return Command{C, CompMnemonic(cmp), JumpMnemonic(jmp), LocNull, ""}, nil
 	}
 	return Command{}, fmt.Errorf("%s is not a C instruction", line)
 }
@@ -132,8 +132,13 @@ func (p *Parser) Dest() (MemoryLocation, error) {
 }
 
 // Comp retrieves the comp mnemonic of the current C command
-func (p *Parser) Comp() (MemoryLocation, error) {
-	return LocNull, nil
+func (p *Parser) Comp() (CompMnemonic, error) {
+	return Comp0, nil
+}
+
+// Jump retrieves the jump mnemonic of the current C command
+func (p *Parser) Jump() (JumpMnemonic, error) {
+	return JmpNull, nil
 }
 
 func filterEmpty(s []string) []string {

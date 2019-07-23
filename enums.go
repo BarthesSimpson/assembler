@@ -43,13 +43,13 @@ const (
 // MemoryLocationStrings enables converting a MemoryLocation to and from its string representation
 var MemoryLocationStrings = []string{"null", "M", "D", "MD", "A", "AM", "AD", "AMD"}
 
-// Comp is an integer enum type
-type Comp int
+// CompMnemonic is an integer enum type
+type CompMnemonic int
 
 // Enum for the possible comp mnemonics that a C command
 // can encode
 const (
-	Comp0 Comp = iota
+	Comp0 CompMnemonic = iota
 	Comp1
 	CompMinus1
 	CompD
@@ -66,10 +66,10 @@ const (
 	CompDminusA
 	CompAminusD
 	CompDandA
-	CompAorA
+	CompDorA
 	CompM
 	CompNegM
-	CompAminusM
+	CompMinusM
 	CompMplus1
 	CompMminus1
 	CompDplusM
@@ -82,13 +82,13 @@ const (
 // CompStrings enables converting a Comp to and from its string representation
 var CompStrings = []string{"0", "1", "-1", "D", "A", "!D", "!A", "-D", "-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", "A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", "M-1", "D+M", "D-M", "M-D", "D&M", "D|M"}
 
-// Jump is an integer enum type
-type Jump int
+// JumpMnemonic is an integer enum type
+type JumpMnemonic int
 
 // Enum for the possible jump mnemonics that a C command
 // can encode
 const (
-	JmpNull Jump = iota
+	JmpNull JumpMnemonic = iota
 	JGT
 	FEQ
 	JGE
