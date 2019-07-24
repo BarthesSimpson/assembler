@@ -39,14 +39,18 @@ func (p *Parser) HasMoreCommands() bool {
 
 // CurrentCommand returns the parsed command for the current line if it exists
 func (p *Parser) CurrentCommand() (Command, error) {
-	fmt.Print("CurrentCommand is not yet implemented")
-	return Command{}, nil
+	if p.currentCommand.ctype == 0 {
+		return Command{}, errors.New("No command has been parsed")
+	}
+	return p.currentCommand, nil
 }
 
 // CommandType returns the type of the current command if it exists
 func (p *Parser) CommandType() (CommandType, error) {
-	fmt.Print("CommandType is not yet implemented")
-	return 3, nil
+	if p.currentCommand.ctype == 0 {
+		return 0, errors.New("No command has been parsed")
+	}
+	return p.currentCommand.ctype, nil
 }
 
 // Advance moves one line forward in the input file
@@ -128,17 +132,29 @@ func (p *Parser) Symbol() (string, error) {
 
 // Dest retrieves the memory location where the current C command should write its output
 func (p *Parser) Dest() (MemoryLocation, error) {
-	return LocNull, nil
+	cmd, err := p.CurrentCommand()
+	if err != nil || cmd.ctype != C {
+		return LocNull, errors.New("the parser has no C command loaded")
+	}
+	return cmd.mloc, nil
 }
 
 // Comp retrieves the comp mnemonic of the current C command
 func (p *Parser) Comp() (CompMnemonic, error) {
-	return Comp0, nil
+	cmd, err := p.CurrentCommand()
+	if err != nil || cmd.ctype != C {
+		return Comp0, errors.New("the parser has no C command loaded")
+	}
+	return cmd.comp, nil
 }
 
 // Jump retrieves the jump mnemonic of the current C command
 func (p *Parser) Jump() (JumpMnemonic, error) {
-	return JmpNull, nil
+	cmd, err := p.CurrentCommand()
+	if err != nil || cmd.ctype != C {
+		return JmpNull, errors.New("the parser has no C command loaded")
+	}
+	return cmd.jump, nil
 }
 
 func filterEmpty(s []string) []string {

@@ -1,0 +1,3 @@
+- Add instruction parsing to the main loop
+- Write output
+- Integration test against the provided demo files
