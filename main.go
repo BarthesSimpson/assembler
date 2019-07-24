@@ -16,6 +16,6 @@ func main() {
 	fname := strings.Split(inpath, ".")[0]
 	outpath := fmt.Sprintf("%s.hack", fname)
 
-	asm := Assembler{inpath, outpath, nil}
+	asm := Assembler{inpath, outpath, Code{}, nil}
 	asm.Convert()
 }
