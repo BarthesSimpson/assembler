@@ -9,7 +9,8 @@ type CommandType int
 // L is a symbol or variable assignment
 // Comment is a commented line that will be ignored
 const (
-	A CommandType = iota
+	CmdNull CommandType = iota
+	A
 	C
 	L
 	Comment
@@ -21,7 +22,7 @@ var CommandTypeStrings = []string{"A", "C", "L", "Comment"}
 // IsPrintable determines whether the command is a printable command (a or c type)
 // or a non-printable (comment or pseudo-command)
 func (cmd CommandType) IsPrintable() bool {
-	return cmd < 2
+	return 0 < cmd && cmd < 3
 }
 
 // MemoryLocation is an integer enum type

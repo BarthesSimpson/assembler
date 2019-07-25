@@ -1,4 +1,1 @@
-- Handle parsing blank lines and EOF
-- Write newlines
 - Integration test against the provided demo files
-- Get line numbers for debugging by initializing parser counter field to 1 and incrementing with each call to Advance()

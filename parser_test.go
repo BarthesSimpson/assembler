@@ -96,5 +96,16 @@ func TestParser(t *testing.T) {
 				g.Assert(sym).Equal("")
 			})
 		})
+		g.Describe("A Statement parsing", func() {
+			f, _ := os.Open("./test/Test.asm")
+			p := NewParser(f)
+			g.It("Should parse an A Statement", func() {
+				cmd, _ := p.parseLine("@A")
+				g.Assert(cmd.comp).Equal(Comp0)
+				g.Assert(cmd.jump).Equal(JmpNull)
+				g.Assert(cmd.mloc).Equal(LocNull)
+				g.Assert(cmd.symbol).Equal("A")
+			})
+		})
 	})
 }
