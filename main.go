@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {

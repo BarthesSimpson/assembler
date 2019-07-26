@@ -39,10 +39,10 @@ func TestParser(t *testing.T) {
 			p := NewParser(f)
 			g.It("Should parse an assignment C Statement", func() {
 				cmd, _ := p.parseCInstruction("D=D+A")
-				g.Assert(cmd.comp).Equal(Comp0)
+				g.Assert(cmd.comp).Equal(CompDplusA)
 				g.Assert(cmd.jump).Equal(JmpNull)
 				g.Assert(cmd.mloc).Equal(LocD)
-				g.Assert(cmd.symbol).Equal("D+A")
+				g.Assert(cmd.symbol).Equal("")
 			})
 			g.It("Should parse a comparison C Statement", func() {
 				cmd, _ := p.parseCInstruction("D;JGT")
@@ -75,11 +75,11 @@ func TestParser(t *testing.T) {
 				dest, _ := p.Dest()
 				g.Assert(dest).Equal(LocD)
 				comp, _ := p.Comp()
-				g.Assert(comp).Equal(Comp0)
+				g.Assert(comp).Equal(CompA)
 				jmp, _ := p.Jump()
 				g.Assert(jmp).Equal(JmpNull)
 				sym, _ := p.Symbol()
-				g.Assert(sym).Equal("A")
+				g.Assert(sym).Equal("")
 			})
 			g.It("Should correctly decompose a comparison C Statement", func() {
 				f, _ := os.Open("./test/CInstructions.asm")

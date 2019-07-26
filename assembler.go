@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	bit "github.com/golang-collections/go-datastructures/bitarray"
 )
 
@@ -78,7 +78,7 @@ func (asm *Assembler) writeACommand(p Parser, l int) {
 		log.Fatalf("Invalid symbol or decimal constant on line %d: %s", l, err)
 	}
 	str := fmt.Sprintf("%016b\n", ins)
-	fmt.Print(str)
+	log.Debug(str)
 	_, err = asm.w.WriteString(str)
 	if err != nil {
 		log.Fatalf("Unable to write line %d: %s", l, err)
@@ -151,7 +151,7 @@ func (asm *Assembler) writeCCommand(p Parser, l int) {
 			strArr[i] = "1"
 		}
 	}
-	fmt.Println(strings.Join(strArr, ""))
+	log.Debug(strings.Join(strArr, ""))
 
 	out := fmt.Sprintf("%s\n", strings.Join(strArr, ""))
 	_, err = asm.w.WriteString(out)

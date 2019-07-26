@@ -1,1 +1,1 @@
-- Integration test against the provided demo files
+- Handle symbols

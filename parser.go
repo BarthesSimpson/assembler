@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Command represents a single assembly command
@@ -95,7 +96,11 @@ func (p *Parser) parseCInstruction(line string) (Command, error) {
 		if mloc == -1 {
 			return Command{}, fmt.Errorf("%s is not a valid memory location", chars[0])
 		}
-		return Command{C, Comp0, JmpNull, MemoryLocation(mloc), chars[1]}, nil
+		comp := EnumValFromString(CompStrings, chars[1])
+		if comp == -1 {
+			return Command{}, fmt.Errorf("%s is not a valid memory location", chars[0])
+		}
+		return Command{C, CompMnemonic(comp), JmpNull, MemoryLocation(mloc), ""}, nil
 	}
 
 	if strings.Contains(line, ";") {

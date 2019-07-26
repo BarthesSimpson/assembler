@@ -1,6 +1,8 @@
 package main
 
-import bit "github.com/golang-collections/go-datastructures/bitarray"
+import (
+	bit "github.com/golang-collections/go-datastructures/bitarray"
+)
 
 // Code converts machine language tokens into binary
 type Code struct{}
