@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -22,15 +23,16 @@ type Command struct {
 // Parser is the main object that processes the input file line by line
 type Parser struct {
 	infile          *os.File
+	st              *SymbolTable
 	scanner         *bufio.Scanner
 	currentCommand  Command
 	hasMoreCommands bool
 }
 
 // NewParser is a factory that creates a parser instance for the given file
-func NewParser(infile *os.File) Parser {
+func NewParser(infile *os.File, st *SymbolTable) Parser {
 	scanner := bufio.NewScanner(infile)
-	return Parser{infile, scanner, Command{}, true}
+	return Parser{infile, st, scanner, Command{}, true}
 }
 
 // HasMoreCommands indicates whether the entire input file has been processed
@@ -39,19 +41,13 @@ func (p *Parser) HasMoreCommands() bool {
 }
 
 // CurrentCommand returns the parsed command for the current line if it exists
-func (p *Parser) CurrentCommand() (Command, error) {
-	if p.currentCommand.ctype == 0 {
-		return Command{}, errors.New("No command has been parsed")
-	}
-	return p.currentCommand, nil
+func (p *Parser) CurrentCommand() Command {
+	return p.currentCommand
 }
 
 // CommandType returns the type of the current command if it exists
-func (p *Parser) CommandType() (CommandType, error) {
-	if p.currentCommand.ctype == 0 {
-		return 0, errors.New("No command has been parsed")
-	}
-	return p.currentCommand.ctype, nil
+func (p *Parser) CommandType() CommandType {
+	return p.currentCommand.ctype
 }
 
 // Advance moves one line forward in the input file
@@ -73,8 +69,16 @@ func (p *Parser) parseLine(line string) (Command, error) {
 	if strings.HasPrefix(line, CommentToken) {
 		return Command{Comment, Comp0, JmpNull, LocNull, line[2:]}, nil
 	}
+	line = stripInlineComments(line)
+	if strings.HasPrefix(line, LabelToken) {
+		return Command{L, Comp0, JmpNull, LocNull, line[1 : len(line)-1]}, nil
+	}
 	if strings.HasPrefix(line, ACmdToken) {
-		return Command{A, Comp0, JmpNull, LocNull, line[1:]}, nil
+		cmd, err := p.parseAInstruction(line)
+		if err != nil {
+			return Command{}, err
+		}
+		return cmd, nil
 	}
 	if strings.ContainsAny(line, "=;") {
 		cmd, err := p.parseCInstruction(line)
@@ -83,7 +87,22 @@ func (p *Parser) parseLine(line string) (Command, error) {
 		}
 		return cmd, nil
 	}
-	return Command{L, Comp0, JmpNull, LocNull, line}, nil
+	return Command{CmdNull, Comp0, JmpNull, LocNull, ""}, nil
+}
+
+func (p *Parser) parseAInstruction(line string) (Command, error) {
+	sym := line[1:]
+	// If symbol is an integer literal, we can just return is as is
+	if _, err := strconv.Atoi(sym); err == nil {
+		return Command{A, Comp0, JmpNull, LocNull, sym}, nil
+	}
+	// If symbol is already in the symbol table, just resolve it;
+	// Otherwise, insert it at the next available RAM location
+	if !p.st.Contains(sym) {
+		p.st.AddElement(sym, -1)
+	}
+	addr := fmt.Sprintf("%d", p.st.GetAddress(sym))
+	return Command{A, Comp0, JmpNull, LocNull, addr}, nil
 }
 
 func (p *Parser) parseCInstruction(line string) (Command, error) {
@@ -124,21 +143,18 @@ func (p *Parser) parseCInstruction(line string) (Command, error) {
 // Symbol retrieves the symbol (variable name or constant) associated with the current command
 // if it exists
 func (p *Parser) Symbol() (string, error) {
-	ctype, _ := p.CommandType()
-	if !ctype.IsPrintable() {
+	ctype := p.CommandType()
+	if !ctype.IsPrintable() && ctype != L {
 		return "", errors.New("only A commands and C commands can contain symbols")
 	}
-	cmd, err := p.CurrentCommand()
-	if err != nil {
-		return "", errors.New("the parser has no command loaded")
-	}
+	cmd := p.CurrentCommand()
 	return cmd.symbol, nil
 }
 
 // Dest retrieves the memory location where the current C command should write its output
 func (p *Parser) Dest() (MemoryLocation, error) {
-	cmd, err := p.CurrentCommand()
-	if err != nil || cmd.ctype != C {
+	cmd := p.CurrentCommand()
+	if cmd.ctype != C {
 		return LocNull, errors.New("the parser has no C command loaded")
 	}
 	return cmd.mloc, nil
@@ -146,8 +162,8 @@ func (p *Parser) Dest() (MemoryLocation, error) {
 
 // Comp retrieves the comp mnemonic of the current C command
 func (p *Parser) Comp() (CompMnemonic, error) {
-	cmd, err := p.CurrentCommand()
-	if err != nil || cmd.ctype != C {
+	cmd := p.CurrentCommand()
+	if cmd.ctype != C {
 		return Comp0, errors.New("the parser has no C command loaded")
 	}
 	return cmd.comp, nil
@@ -155,12 +171,14 @@ func (p *Parser) Comp() (CompMnemonic, error) {
 
 // Jump retrieves the jump mnemonic of the current C command
 func (p *Parser) Jump() (JumpMnemonic, error) {
-	cmd, err := p.CurrentCommand()
-	if err != nil || cmd.ctype != C {
+	cmd := p.CurrentCommand()
+	if cmd.ctype != C {
 		return JmpNull, errors.New("the parser has no C command loaded")
 	}
 	return cmd.jump, nil
 }
+
+// Helper functions
 
 func filterEmpty(s []string) []string {
 	var r []string
@@ -170,4 +188,9 @@ func filterEmpty(s []string) []string {
 		}
 	}
 	return r
+}
+
+func stripInlineComments(line string) string {
+	split := strings.Split(line, CommentToken)
+	return strings.Trim(split[0], " ")
 }

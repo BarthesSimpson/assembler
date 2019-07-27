@@ -4,4 +4,5 @@ package main
 const (
 	CommentToken = "//"
 	ACmdToken    = "@"
+	LabelToken   = "("
 )

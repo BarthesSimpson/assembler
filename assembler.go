@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	bit "github.com/golang-collections/go-datastructures/bitarray"
+	log "github.com/sirupsen/logrus"
 )
 
 // Assembler is the main object that converts a .asm file to a binary .hack file
@@ -16,6 +16,7 @@ type Assembler struct {
 	inpath  string
 	outpath string
 	encoder Code
+	st      SymbolTable
 	w       *bufio.Writer
 }
 
@@ -33,18 +34,51 @@ func (asm *Assembler) Convert() {
 	}
 	defer dest.Close()
 
-	p := NewParser(infile)
 	asm.w = bufio.NewWriter(dest)
+	// asm.buildSymbolTable(infile)
+	// asm.st.Debug()
+	asm.translateInstructions(infile)
+}
+
+// Perform a first pass of the input file, constructing the symbol table
+// that will be used in translating the assembly code into binary.
+// For each label that is encountered, store the label in the table;
+// for each A or C instruction, increment the RAM address that is used
+// to store the next label.
+func (asm *Assembler) buildSymbolTable(infile *os.File) {
+	p := NewParser(infile, &asm.st)
+	l := 1
+	addr := 0
+	for {
+		p.Advance()
+		if !p.HasMoreCommands() {
+			break
+		}
+		ctype := p.CommandType()
+		if ctype == L {
+			sym, err := p.Symbol()
+			if err != nil {
+				log.Fatalf("Unable to retrieve symbol for line %d: %s", l, err)
+			}
+			asm.st.AddElement(sym, addr)
+		} else if ctype == C || ctype == A {
+			addr++
+		}
+		l++
+	}
+}
+
+// Perform a second pass of the input file, during which the actual
+// conversion to binary and writing of the output is performed
+func (asm *Assembler) translateInstructions(infile *os.File) {
+	p := NewParser(infile, &asm.st)
 	l := 1
 	for {
 		p.Advance()
 		if !p.HasMoreCommands() {
 			break
 		}
-		ctype, err := p.CommandType()
-		if err != nil {
-			log.Fatalf("Unable to parse line %d: %s", l, err)
-		}
+		ctype := p.CommandType()
 		if ctype.IsPrintable() {
 			asm.processCommand(p, l)
 		}
@@ -54,10 +88,7 @@ func (asm *Assembler) Convert() {
 }
 
 func (asm *Assembler) processCommand(p Parser, l int) {
-	cmd, err := p.CurrentCommand()
-	if err != nil {
-		log.Fatalf("Unable to parse line %d: %s", l, err)
-	}
+	cmd := p.CurrentCommand()
 	if cmd.ctype == A {
 		asm.writeACommand(p, l)
 		return

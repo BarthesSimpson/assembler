@@ -30,18 +30,20 @@ func TestIntegration(t *testing.T) {
 }
 
 func CompareFiles(infile string, outfile string, expected string, t *testing.T) {
-	asm := Assembler{infile, outfile, Code{}, nil}
+	asm := Assembler{infile, outfile, Code{}, InitializeSymbolTable(), nil}
 	asm.Convert()
 
 	out, err := os.Open(outfile)
 	if err != nil {
 		t.Errorf("Unable to open output file: %s", err)
+		t.FailNow()
 	}
 	defer out.Close()
 
 	exp, err := os.Open(expected)
 	if err != nil {
 		t.Errorf("Unable to open expected file: %s", err)
+		t.FailNow()
 	}
 	defer exp.Close()
 
@@ -52,10 +54,12 @@ func CompareFiles(infile string, outfile string, expected string, t *testing.T) 
 		outscan.Scan()
 		if expscan.Text() != outscan.Text() {
 			t.Errorf("Mismatch at line %d:\nexpected: %s\nreceived: %s", l, expscan.Text(), outscan.Text())
+			t.FailNow()
 		}
 		l++
 	}
 	if outscan.Scan() {
 		t.Errorf("Compiled output has extra lines. Expected %d", l)
+		t.FailNow()
 	}
 }

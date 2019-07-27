@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,6 +16,6 @@ func main() {
 	inpath := os.Args[1]
 	fname := strings.Split(inpath, ".")[0]
 	outpath := fmt.Sprintf("%s.hack", fname)
-	asm := Assembler{inpath, outpath, Code{}, nil}
+	asm := Assembler{inpath, outpath, Code{}, InitializeSymbolTable(), nil}
 	asm.Convert()
 }
