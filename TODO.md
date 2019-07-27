@@ -1,1 +1,1 @@
-- Handle Variables
+- Nice to have: remove reliance on nasty novars boolean flag

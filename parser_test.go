@@ -18,23 +18,23 @@ func TestParser(t *testing.T) {
 		p := NewParser(f, emptySymbolTable())
 
 		g.It("Should recognize an A Statement", func() {
-			cmd, _ := p.parseLine("@M")
+			cmd, _ := p.parseLine("@M", true)
 			g.Assert(cmd.ctype).Equal(A)
 		})
 		g.It("Should recognize an assignment C Statement", func() {
-			cmd, _ := p.parseLine("D=D+A")
+			cmd, _ := p.parseLine("D=D+A", true)
 			g.Assert(cmd.ctype).Equal(C)
 		})
 		g.It("Should recognize a comparison C Statement", func() {
-			cmd, _ := p.parseLine("0;JMP")
+			cmd, _ := p.parseLine("0;JMP", true)
 			g.Assert(cmd.ctype).Equal(C)
 		})
 		g.It("Should recognize an L Statement", func() {
-			cmd, _ := p.parseLine("(LOOP)")
+			cmd, _ := p.parseLine("(LOOP)", true)
 			g.Assert(cmd.ctype).Equal(L)
 		})
 		g.It("Should recognize a Comment Statement", func() {
-			cmd, _ := p.parseLine("//D=D+A")
+			cmd, _ := p.parseLine("//D=D+A", true)
 			g.Assert(cmd.ctype).Equal(Comment)
 		})
 
@@ -75,7 +75,7 @@ func TestParser(t *testing.T) {
 			g.It("Should correctly decompose an assignment C Statement", func() {
 				f, _ := os.Open("./test/CInstructions.asm")
 				p := NewParser(f, emptySymbolTable())
-				p.Advance()
+				p.Advance(true)
 				dest, _ := p.Dest()
 				g.Assert(dest).Equal(LocD)
 				comp, _ := p.Comp()
@@ -88,8 +88,8 @@ func TestParser(t *testing.T) {
 			g.It("Should correctly decompose a comparison C Statement", func() {
 				f, _ := os.Open("./test/CInstructions.asm")
 				p := NewParser(f, emptySymbolTable())
-				p.Advance()
-				p.Advance()
+				p.Advance(true)
+				p.Advance(true)
 				dest, _ := p.Dest()
 				g.Assert(dest).Equal(LocNull)
 				comp, _ := p.Comp()
@@ -104,7 +104,7 @@ func TestParser(t *testing.T) {
 			f, _ := os.Open("./test/Test.asm")
 			p := NewParser(f, emptySymbolTable())
 			g.It("Should parse an A Statement", func() {
-				cmd, _ := p.parseLine("@12345")
+				cmd, _ := p.parseLine("@12345", true)
 				g.Assert(cmd.comp).Equal(Comp0)
 				g.Assert(cmd.jump).Equal(JmpNull)
 				g.Assert(cmd.mloc).Equal(LocNull)
@@ -119,14 +119,14 @@ func TestParser(t *testing.T) {
 		p := NewParser(f, &st)
 
 		g.It("Should parse an L Statement", func() {
-			cmd, _ := p.parseLine("(LOOP)")
+			cmd, _ := p.parseLine("(LOOP)", true)
 			g.Assert(cmd.comp).Equal(Comp0)
 			g.Assert(cmd.jump).Equal(JmpNull)
 			g.Assert(cmd.mloc).Equal(LocNull)
 			g.Assert(cmd.symbol).Equal("LOOP")
 		})
 		g.It("Should parse an A Statement with a preset label", func() {
-			cmd, _ := p.parseLine("@LCL")
+			cmd, _ := p.parseLine("@LCL", true)
 			g.Assert(cmd.comp).Equal(Comp0)
 			g.Assert(cmd.jump).Equal(JmpNull)
 			g.Assert(cmd.mloc).Equal(LocNull)
@@ -134,14 +134,14 @@ func TestParser(t *testing.T) {
 		})
 		g.It("Should parse an A Statement with a user defined label", func() {
 			p.st.AddElement("LOOP", 4)
-			cmd, _ := p.parseLine("@LOOP")
+			cmd, _ := p.parseLine("@LOOP", true)
 			g.Assert(cmd.comp).Equal(Comp0)
 			g.Assert(cmd.jump).Equal(JmpNull)
 			g.Assert(cmd.mloc).Equal(LocNull)
 			g.Assert(cmd.symbol).Equal("4")
 		})
 		g.It("Should parse an A Statement with a variable", func() {
-			cmd, _ := p.parseLine("@VAR_1")
+			cmd, _ := p.parseLine("@VAR_1", false)
 			g.Assert(cmd.comp).Equal(Comp0)
 			g.Assert(cmd.jump).Equal(JmpNull)
 			g.Assert(cmd.mloc).Equal(LocNull)

@@ -51,21 +51,21 @@ func (p *Parser) CommandType() CommandType {
 }
 
 // Advance moves one line forward in the input file
-func (p *Parser) Advance() {
+func (p *Parser) Advance(novars bool) {
 	p.hasMoreCommands = p.scanner.Scan()
 	if !p.hasMoreCommands {
 		return
 	}
 	line := p.scanner.Text()
 	p.hasMoreCommands = true
-	cmd, err := p.parseLine(line)
+	cmd, err := p.parseLine(line, novars)
 	if err != nil {
 		log.Fatalf("Unable to parse line %s", line)
 	}
 	p.currentCommand = cmd
 }
 
-func (p *Parser) parseLine(line string) (Command, error) {
+func (p *Parser) parseLine(line string, novars bool) (Command, error) {
 	if strings.HasPrefix(line, CommentToken) {
 		return Command{Comment, Comp0, JmpNull, LocNull, line[2:]}, nil
 	}
@@ -74,7 +74,7 @@ func (p *Parser) parseLine(line string) (Command, error) {
 		return Command{L, Comp0, JmpNull, LocNull, line[1 : len(line)-1]}, nil
 	}
 	if strings.HasPrefix(line, ACmdToken) {
-		cmd, err := p.parseAInstruction(line)
+		cmd, err := p.parseAInstruction(line, novars)
 		if err != nil {
 			return Command{}, err
 		}
@@ -90,7 +90,7 @@ func (p *Parser) parseLine(line string) (Command, error) {
 	return Command{CmdNull, Comp0, JmpNull, LocNull, ""}, nil
 }
 
-func (p *Parser) parseAInstruction(line string) (Command, error) {
+func (p *Parser) parseAInstruction(line string, novars bool) (Command, error) {
 	sym := line[1:]
 	// If symbol is an integer literal, we can just return is as is
 	if _, err := strconv.Atoi(sym); err == nil {
@@ -98,7 +98,7 @@ func (p *Parser) parseAInstruction(line string) (Command, error) {
 	}
 	// If symbol is already in the symbol table, just resolve it;
 	// Otherwise, insert it at the next available RAM location
-	if !p.st.Contains(sym) {
+	if !p.st.Contains(sym) && !novars {
 		p.st.AddElement(sym, -1)
 	}
 	addr := fmt.Sprintf("%d", p.st.GetAddress(sym))
@@ -145,7 +145,7 @@ func (p *Parser) parseCInstruction(line string) (Command, error) {
 func (p *Parser) Symbol() (string, error) {
 	ctype := p.CommandType()
 	if !ctype.IsPrintable() && ctype != L {
-		return "", errors.New("only A commands and C commands can contain symbols")
+		return "", errors.New("only A, C, and L commands can contain symbols")
 	}
 	cmd := p.CurrentCommand()
 	return cmd.symbol, nil

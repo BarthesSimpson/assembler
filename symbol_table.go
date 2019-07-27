@@ -29,6 +29,7 @@ func (st *SymbolTable) Contains(sym string) bool {
 	return false
 }
 
+// Debug is used to inspect the symbol table
 func (st *SymbolTable) Debug() {
 	fmt.Printf("%v", st.table)
 }
@@ -43,7 +44,7 @@ func (st *SymbolTable) GetAddress(sym string) int {
 }
 
 // InitializeSymbolTable returns a new SymbolTable pre-populated with the built-in
-// symbols. Sets nextsRAM to 16 (this is where the RAM addresses allocated for variables begin)
+// symbols. Sets nextRAM to 16 (this is where the RAM addresses allocated for variables begin)
 func InitializeSymbolTable() SymbolTable {
 	pre := map[string]int{
 		"SP":     0,

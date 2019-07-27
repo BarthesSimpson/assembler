@@ -27,6 +27,17 @@ func TestIntegration(t *testing.T) {
 			CompareFiles("test/PongL.asm", "test/PongL.hack", "test/PongLExpected.hack", t)
 		})
 	})
+	g.Describe("Integration tests with symbols", func() {
+		g.It("Finds the max of 2 numbers", func() {
+			CompareFiles("test/Max.asm", "test/Max.hack", "test/MaxExpected.hack", t)
+		})
+		g.It("Draws a rectangle on the screen", func() {
+			CompareFiles("test/Rect.asm", "test/Rect.hack", "test/RectExpected.hack", t)
+		})
+		g.It("Plays pong", func() {
+			CompareFiles("test/Pong.asm", "test/Pong.hack", "test/PongExpected.hack", t)
+		})
+	})
 }
 
 func CompareFiles(infile string, outfile string, expected string, t *testing.T) {

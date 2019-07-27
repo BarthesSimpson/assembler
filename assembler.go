@@ -26,7 +26,6 @@ func (asm *Assembler) Convert() {
 	if err != nil {
 		log.Fatalf("Unable to open input file: %s", err)
 	}
-	defer infile.Close()
 
 	dest, err := os.Create(asm.outpath)
 	if err != nil {
@@ -35,9 +34,15 @@ func (asm *Assembler) Convert() {
 	defer dest.Close()
 
 	asm.w = bufio.NewWriter(dest)
-	// asm.buildSymbolTable(infile)
-	// asm.st.Debug()
+	asm.buildSymbolTable(infile)
+	infile.Close() // Do not defer this, as doing so will block translateInstructions
+
+	infile, err = os.Open(asm.inpath)
+	if err != nil {
+		log.Fatalf("Unable to open input file: %s", err)
+	}
 	asm.translateInstructions(infile)
+	infile.Close()
 }
 
 // Perform a first pass of the input file, constructing the symbol table
@@ -50,7 +55,7 @@ func (asm *Assembler) buildSymbolTable(infile *os.File) {
 	l := 1
 	addr := 0
 	for {
-		p.Advance()
+		p.Advance(true)
 		if !p.HasMoreCommands() {
 			break
 		}
@@ -74,7 +79,7 @@ func (asm *Assembler) translateInstructions(infile *os.File) {
 	p := NewParser(infile, &asm.st)
 	l := 1
 	for {
-		p.Advance()
+		p.Advance(false)
 		if !p.HasMoreCommands() {
 			break
 		}
